@@ -20,7 +20,7 @@
               variant="outlined"
               v-bind="props"
             >
-              New Item
+              New Data
             </v-btn>
           </template>
           <v-card>
@@ -29,36 +29,41 @@
             </v-card-title>
 
             <v-card-text>
-              <v-container>
-                <v-row>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.nama"
-                      label="Nama Lengkap"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.email"
-                      label="Email"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <v-text-field
-                      v-model="editedItem.usia"
-                      label="Usia"
-                    ></v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="4" sm="6">
-                    <p>Status Keanggotaan</p>
-                    <v-switch
-                      v-model="editedItem.status"
-                      color="primary"
-                      label="Aktif"
-                    ></v-switch>
-                  </v-col>
-                </v-row>
-              </v-container>
+              <v-form ref="form" v-model="formValid">
+                <v-container>
+                  <v-row>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedItem.nama"
+                        label="Nama Lengkap"
+                        :rules="[(v) => !!v || 'Nama Lengkap wajib diisi']"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedItem.email"
+                        label="Email"
+                        :rules="emailRules"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <v-text-field
+                        v-model="editedItem.usia"
+                        label="Usia"
+                        :rules="ageRules"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" md="4" sm="6">
+                      <p>Status Keanggotaan</p>
+                      <v-switch
+                        v-model="editedItem.status"
+                        color="primary"
+                        label="Aktif"
+                      ></v-switch>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-form>
             </v-card-text>
 
             <v-card-actions>
@@ -152,11 +157,20 @@ export default {
       usia: 0,
       status: 0,
     },
+    formValid: false,
+    emailRules: [
+      (v) => !!v || "Email wajib diisi",
+      (v) => /.+@.+\..+/.test(v) || "Format email tidak valid",
+    ],
+    ageRules: [
+      (v) => !!v || "Usia wajib diisi",
+      (v) => v > 0 || "Format usia tidak valid",
+    ],
   }),
 
   computed: {
     formTitle() {
-      return this.editedIndex === -1 ? "New Item" : "Edit Item";
+      return this.editedIndex === -1 ? "New Data" : "Edit Data";
     },
   },
 
@@ -224,12 +238,17 @@ export default {
     },
 
     save() {
-      if (this.editedIndex > -1) {
-        Object.assign(this.users[this.editedIndex], this.editedItem);
-      } else {
-        this.users.push(this.editedItem);
+      // Memanggil metode validate() untuk memastikan semua input sudah valid
+      this.$refs.form.validate();
+
+      if (this.formValid) {
+        if (this.editedIndex > -1) {
+          Object.assign(this.users[this.editedIndex], this.editedItem);
+        } else {
+          this.users.push(this.editedItem);
+        }
+        this.close();
       }
-      this.close();
     },
   },
 };
