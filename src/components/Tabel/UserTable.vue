@@ -1,10 +1,14 @@
 <template>
+  <v-alert v-if="showAlert" type="success" class="mb-2">
+    {{ alertMessage }}
+  </v-alert>
   <v-data-table
     :headers="headers"
     :items="users"
     :sort-by="[{ key: 'nama', order: 'asc' }]"
     :header-props="{ class: 'text-md !font-semibold !text-gray-700' }"
     class="border rounded-md shadow-lg flex items-stretch"
+    :loading="loading"
   >
     <template v-slot:top>
       <v-toolbar flat :elevation="1" color="amber-lighten-3">
@@ -166,6 +170,9 @@ export default {
       (v) => !!v || "Usia wajib diisi",
       (v) => v > 0 || "Format usia tidak valid",
     ],
+    showAlert: false,
+    loading: false,
+    alertMessage: "",
   }),
 
   computed: {
@@ -189,6 +196,7 @@ export default {
 
   methods: {
     async initialize() {
+      this.loading = true;
       try {
         // Fetch Data Dari Endpoint API
         const res = await axios.get("https://dummyjson.com/users");
@@ -201,6 +209,8 @@ export default {
         }));
       } catch (e) {
         console.error("Gagal mengambil data: ", e);
+      } finally {
+        this.loading = false;
       }
     },
 
@@ -244,8 +254,18 @@ export default {
       if (this.formValid) {
         if (this.editedIndex > -1) {
           Object.assign(this.users[this.editedIndex], this.editedItem);
+          this.alertMessage = "Data berhasil diperbaharui!";
+          this.showAlert = true;
+          setTimeout(() => {
+            this.showAlert = false;
+          }, 4000);
         } else {
           this.users.push(this.editedItem);
+          this.alertMessage = "Data berhasil ditambahkan!";
+          this.showAlert = true;
+          setTimeout(() => {
+            this.showAlert = false;
+          }, 4000);
         }
         this.close();
       }
