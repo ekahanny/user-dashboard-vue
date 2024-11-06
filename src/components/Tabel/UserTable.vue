@@ -29,35 +29,37 @@
           </template>
           <v-card>
             <v-card-title>
-              <span class="text-h5">{{ formTitle }}</span>
+              <span class="text-h5 flex items-center justify-center !mt-5">{{
+                formTitle
+              }}</span>
             </v-card-title>
 
             <v-card-text>
               <v-form ref="form" v-model="formValid">
                 <v-container>
                   <v-row>
-                    <v-col cols="12" md="4" sm="6">
+                    <v-col cols="12" md="6" sm="6">
                       <v-text-field
                         v-model="editedItem.nama"
                         label="Nama Lengkap"
                         :rules="[(v) => !!v || 'Nama Lengkap wajib diisi']"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" md="4" sm="6">
+                    <v-col cols="12" md="6" sm="6">
                       <v-text-field
                         v-model="editedItem.email"
                         label="Email"
                         :rules="emailRules"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" md="4" sm="6">
+                    <v-col cols="12" md="6" sm="6">
                       <v-text-field
                         v-model="editedItem.usia"
                         label="Usia"
                         :rules="ageRules"
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" md="4" sm="6">
+                    <v-col cols="12" md="6" sm="6">
                       <p>Status Keanggotaan</p>
                       <v-switch
                         v-model="editedItem.status"
@@ -83,7 +85,7 @@
         </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
-            <v-card-title class="text-h5 ml-10 mt-5 mb-2"
+            <v-card-title class="sm:text-h2 sm:ml-3 mt-5 mb-2"
               >Anda yakin ingin menghapus data?</v-card-title
             >
             <v-card-actions>
@@ -117,10 +119,15 @@
     </template>
 
     <template v-slot:item.actions="{ item }">
-      <v-icon class="me-2" color="success" size="large" @click="editItem(item)">
+      <v-icon color="success" size="large" @click="editItem(item)">
         mdi-pencil
       </v-icon>
-      <v-icon size="large" color="warning" @click="deleteItem(item)">
+      <v-icon
+        class="md:ml-1"
+        size="large"
+        color="warning"
+        @click="deleteItem(item)"
+      >
         mdi-delete
       </v-icon>
     </template>
@@ -152,13 +159,13 @@ export default {
     editedItem: {
       nama: "",
       email: "",
-      usia: 0,
+      usia: "",
       status: 0,
     },
     defaultItem: {
       nama: "",
       email: "",
-      usia: 0,
+      usia: "",
       status: 0,
     },
     formValid: false,
@@ -169,6 +176,7 @@ export default {
     ageRules: [
       (v) => !!v || "Usia wajib diisi",
       (v) => v > 0 || "Format usia tidak valid",
+      (v) => !/^0\d/.test(v) || "Usia tidak boleh dimulai dengan 0",
     ],
     showAlert: false,
     loading: false,
@@ -235,9 +243,17 @@ export default {
 
     deleteItemConfirm() {
       this.users.splice(this.editedIndex, 1);
+
       // Simpan data yang sudah dihapus ke localStorage
       localStorage.setItem("users", JSON.stringify(this.users));
+
+      this.alertMessage = "Data berhasil dihapus!";
+      this.showAlert = true;
       this.closeDelete();
+
+      setTimeout(() => {
+        this.showAlert = false;
+      }, 4000);
     },
 
     close() {
@@ -260,6 +276,8 @@ export default {
       this.$refs.form.validate();
 
       if (this.formValid) {
+        this.editedItem.usia = parseInt(this.editedItem.usia, 10);
+
         if (this.editedIndex > -1) {
           // Edit  data
           Object.assign(this.users[this.editedIndex], this.editedItem);
