@@ -83,8 +83,8 @@
         </v-dialog>
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
-            <v-card-title class="text-h5"
-              >Are you sure you want to delete this item?</v-card-title
+            <v-card-title class="text-h5 ml-10 mt-5 mb-2"
+              >Anda yakin ingin menghapus data?</v-card-title
             >
             <v-card-actions>
               <v-spacer></v-spacer>
@@ -198,15 +198,22 @@ export default {
     async initialize() {
       this.loading = true;
       try {
-        // Fetch Data Dari Endpoint API
-        const res = await axios.get("https://dummyjson.com/users");
-        this.users = res.data.users.map((user) => ({
-          nama: `${user.firstName} ${user.lastName}`,
-          email: user.email,
-          usia: user.age,
-          role: user.role,
-          status: user.role === "moderator" ? false : true,
-        }));
+        // Cek apakah data sudah ada di localStorage
+        const storedData = localStorage.getItem("users");
+        if (storedData) {
+          // Jika ada, masukkan kedalam users
+          this.users = JSON.parse(storedData);
+        } else {
+          // Jika tidak ada, fetch data dari API
+          const res = await axios.get("https://dummyjson.com/users");
+          this.users = res.data.users.map((user) => ({
+            nama: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+            usia: user.age,
+            role: user.role,
+            status: user.role === "moderator" ? false : true,
+          }));
+        }
       } catch (e) {
         console.error("Gagal mengambil data: ", e);
       } finally {
@@ -228,6 +235,8 @@ export default {
 
     deleteItemConfirm() {
       this.users.splice(this.editedIndex, 1);
+      // Simpan data yang sudah dihapus ke localStorage
+      localStorage.setItem("users", JSON.stringify(this.users));
       this.closeDelete();
     },
 
@@ -248,25 +257,27 @@ export default {
     },
 
     save() {
-      // Memanggil metode validate() untuk memastikan semua input sudah valid
       this.$refs.form.validate();
 
       if (this.formValid) {
         if (this.editedIndex > -1) {
+          // Edit  data
           Object.assign(this.users[this.editedIndex], this.editedItem);
-          this.alertMessage = "Data berhasil diperbaharui!";
-          this.showAlert = true;
-          setTimeout(() => {
-            this.showAlert = false;
-          }, 4000);
+          this.alertMessage = "Data berhasil diubah!";
         } else {
+          // Tambah data
           this.users.push(this.editedItem);
           this.alertMessage = "Data berhasil ditambahkan!";
-          this.showAlert = true;
-          setTimeout(() => {
-            this.showAlert = false;
-          }, 4000);
         }
+
+        // Simpan data ke localStorage setelah perubahan
+        localStorage.setItem("users", JSON.stringify(this.users));
+
+        this.showAlert = true;
+        setTimeout(() => {
+          this.showAlert = false;
+        }, 4000);
+
         this.close();
       }
     },
