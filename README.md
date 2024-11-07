@@ -8,6 +8,7 @@ To run this project, install it locally using npm:
 $ cd user-dashboard-vue
 $ npm install
 $ npm run dev
+```
 
 ## Technologies
 Project is created with:
