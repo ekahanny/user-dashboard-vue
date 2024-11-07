@@ -12,9 +12,9 @@
   >
     <template v-slot:top>
       <v-toolbar flat :elevation="1" color="amber-lighten-3">
-        <!-- <v-toolbar-title>My CRUD</v-toolbar-title> -->
         <v-divider class="mx-4" inset vertical></v-divider>
         <v-spacer></v-spacer>
+
         <v-dialog v-model="dialog" max-width="500px">
           <template v-slot:activator="{ props }">
             <v-btn
@@ -23,7 +23,7 @@
               rounded="2"
               variant="outlined"
               v-bind="props"
-            >
+              >
               New Data
             </v-btn>
           </template>
@@ -33,7 +33,8 @@
                 formTitle
               }}</span>
             </v-card-title>
-
+            
+            <!-- Modal tambah data -->
             <v-card-text>
               <v-form ref="form" v-model="formValid">
                 <v-container>
@@ -83,6 +84,8 @@
             </v-card-actions>
           </v-card>
         </v-dialog>
+
+
         <v-dialog v-model="dialogDelete" max-width="500px">
           <v-card>
             <v-card-title class="sm:text-h2 sm:ml-3 mt-5 mb-2"
@@ -106,6 +109,7 @@
       </v-toolbar>
     </template>
 
+    <!-- Mengatur status keanggotaan pada tabel -->
     <template v-slot:item.status="{ item }">
       <div class="text-center">
         <v-chip
@@ -118,6 +122,7 @@
       </div>
     </template>
 
+    <!-- Actions (update & delete) -->
     <template v-slot:item.actions="{ item }">
       <v-icon color="success" size="large" @click="editItem(item)">
         mdi-pencil
